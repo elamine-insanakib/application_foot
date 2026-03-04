@@ -1,0 +1,149 @@
+.login-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 20px;
+}
+
+.login-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  padding: 40px;
+  max-width: 500px;
+  width: 100%;
+}
+
+h1 {
+  color: #333;
+  text-align: center;
+  margin: 0 0 10px 0;
+  font-size: 2rem;
+}
+
+.subtitle {
+  color: #666;
+  text-align: center;
+  margin: 0 0 30px 0;
+  font-size: 0.95rem;
+}
+
+.user-info {
+  background: #f0f4ff;
+  border-left: 4px solid #667eea;
+  padding: 15px;
+  border-radius: 6px;
+  margin-bottom: 30px;
+}
+
+.current-user {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #333;
+  font-size: 0.95rem;
+}
+
+.current-user strong {
+  color: #667eea;
+  font-size: 1.1rem;
+}
+
+.roles-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 15px;
+}
+
+.role-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  background: #f9f9f9;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 1rem;
+  gap: 8px;
+}
+
+.role-button:hover {
+  border-color: #667eea;
+  background: #f0f4ff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+}
+
+.role-button.active {
+  border-color: #667eea;
+  background: #667eea;
+  color: white;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.role-icon {
+  font-size: 2rem;
+}
+
+.role-name {
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.role-desc {
+  font-size: 0.85rem;
+  opacity: 0.7;
+  font-weight: 400;
+}
+
+.role-button.active .role-desc {
+  opacity: 0.9;
+}
+
+.role-admin {
+  border-color: #ff6b6b;
+}
+
+.role-admin:hover {
+  border-color: #ff6b6b;
+  background: #fff5f5;
+}
+
+.role-admin.active {
+  background: #ff6b6b;
+  border-color: #ff6b6b;
+}
+
+.role-user {
+  border-color: #4ecdc4;
+}
+
+.role-user:hover {
+  border-color: #4ecdc4;
+  background: #f0fffe;
+}
+
+.role-user.active {
+  background: #4ecdc4;
+  border-color: #4ecdc4;
+}
+
+.role-guest {
+  border-color: #95e1d3;
+}
+
+.role-guest:hover {
+  border-color: #95e1d3;
+  background: #f5fffe;
+}
+
+.role-guest.active {
+  background: #95e1d3;
+  border-color: #95e1d3;
+  color: #333;
+}

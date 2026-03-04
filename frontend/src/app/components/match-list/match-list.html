@@ -1,0 +1,193 @@
+<div class="match-list-container">
+  <!-- Panneau de contrôle utilisateur -->
+  <div class="user-panel">
+    <div class="user-info">
+      <h3>Utilisateur actuel</h3>
+      <p class="user-name">{{ currentUser?.name }}</p>
+      <p class="user-role" [ngClass]="'role-' + currentUser?.role">🎭 {{ currentUser?.role | uppercase }}</p>
+    </div>
+    
+    <div class="role-switcher">
+      <h4>Simuler un rôle</h4>
+      <div class="role-buttons">
+        <button 
+          *ngFor="let role of getRoles()"
+          (click)="switchRole(role)"
+          [class.active]="currentUser?.role === role"
+          [class]="'role-btn role-' + role">
+          {{ role | uppercase }}
+        </button>
+      </div>
+    </div>
+
+    <div class="role-description">
+      <h4>Permissions du rôle</h4>
+      <ul>
+        <li *ngIf="currentUser?.role === 'admin'">
+          ✅ Gestion complète (créer, modifier, supprimer)
+          <br>✅ Vue sur tous les matchs
+          <br>✅ Accès aux statistiques
+        </li>
+        <li *ngIf="currentUser?.role === 'user'">
+          ✅ Visualisation des matchs
+        </li>
+        <li *ngIf="currentUser?.role === 'guest'">
+          ✅ Visualisation des matchs
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Section principale -->
+  <div class="main-content">
+    <h2>Liste des Matchs</h2>
+
+    <!-- Bouton créer match pour Admin -->
+    <div *ngIf="currentUser?.role === 'admin'" class="admin-panel">
+      <button class="btn-create" (click)="openForm()">+ Créer un match</button>
+    </div>
+
+    <!-- Formulaire admin pour créer/éditer un match -->
+    <div *ngIf="currentUser?.role === 'admin' && showForm" class="admin-form">
+      <div class="form-header">
+        <h3>{{ isEditingMode ? 'Modifier le match' : 'Créer un nouveau match' }}</h3>
+      </div>
+
+      <div class="form-group">
+        <label for="equipe1">Équipe 1:</label>
+        <input 
+          type="text" 
+          id="equipe1" 
+          [(ngModel)]="newMatch.equipe1!.nom"
+          placeholder="Nom de l'équipe 1"
+          class="form-input">
+      </div>
+
+      <div class="form-group">
+        <label for="equipe2">Équipe 2:</label>
+        <input 
+          type="text" 
+          id="equipe2" 
+          [(ngModel)]="newMatch.equipe2!.nom"
+          placeholder="Nom de l'équipe 2"
+          class="form-input">
+      </div>
+
+      <div class="form-group">
+        <label for="tournoi">Tournoi:</label>
+        <input 
+          type="text" 
+          id="tournoi" 
+          [(ngModel)]="newMatch.tournoi!.nom"
+          placeholder="Nom du tournoi"
+          class="form-input">
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="score1">Score Équipe 1:</label>
+          <input 
+            type="number" 
+            id="score1" 
+            [(ngModel)]="newMatch.score1"
+            (ngModelChange)="onScoreChange()"
+            min="0"
+            class="form-input">
+        </div>
+        <div class="form-group">
+          <label for="score2">Score Équipe 2:</label>
+          <input 
+            type="number" 
+            id="score2" 
+            [(ngModel)]="newMatch.score2"
+            (ngModelChange)="onScoreChange()"
+            min="0"
+            class="form-input">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="dateMatch">Date du match:</label>
+        <input 
+          type="datetime-local" 
+          id="dateMatch" 
+          [value]="newMatch.dateMatch | date:'yyyy-MM-ddTHH:mm'"
+          (change)="newMatch.dateMatch = $any($event).target.value"
+          class="form-input">
+      </div>
+
+      <div class="form-group">
+        <label for="statut">Statut:</label>
+        <select id="statut" [(ngModel)]="newMatch.statut" class="form-input">
+          <option value="Planifié" [disabled]="(newMatch.score1 || 0) > 0 || (newMatch.score2 || 0) > 0">Planifié</option>
+          <option value="En cours">En cours</option>
+          <option value="Terminé">Terminé</option>
+        </select>
+      </div>
+
+      <div class="form-buttons">
+        <button class="btn-save" (click)="saveMatch()">{{ isEditingMode ? 'Mettre à jour' : 'Créer' }}</button>
+        <button class="btn-cancel" (click)="cancelForm()">Annuler</button>
+      </div>
+    </div>
+
+    <!-- Filtre par tournoi -->
+    <div *ngIf="currentUser?.role === 'admin' || currentUser?.role === 'user'" class="filter-section">
+      <label for="tournoiSelect">Filtrer par tournoi:</label>
+      <select id="tournoiSelect" [(ngModel)]="selectedTournoi" (change)="filterByTournoi()">
+        <option value="">Tous</option>
+        <option *ngFor="let t of tournois" [value]="t">{{t}}</option>
+      </select>
+    </div>
+
+    <!-- Table des matchs -->
+    <table *ngIf="pagedMatchs.length > 0; else noMatch" class="matches-table">
+      <thead>
+        <tr>
+          <th>Tournoi</th>
+          <th>Équipe 1</th>
+          <th>Équipe 2</th>
+          <th>Date</th>
+          <th>Score</th>
+          <th>Statut</th>
+          <th *ngIf="currentUser?.role === 'admin'">Gestion</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let m of pagedMatchs" [class]="'match-row status-' + m.statut">
+          <td class="tournament">{{m.tournoi.nom}}</td>
+          <td class="team">{{m.equipe1.nom}}</td>
+          <td class="team">{{m.equipe2.nom}}</td>
+          <td class="date">{{m.dateMatch | date:'short'}}</td>
+          <td class="score">
+            <strong *ngIf="m.statut !== 'Planifié'">{{m.score1}} - {{m.score2}}</strong>
+            <strong *ngIf="m.statut === 'Planifié'">X</strong>
+          </td>
+          <td>
+            <span class="status-badge" [ngClass]="getStatusClass(m.statut)">
+              {{m.statut}}
+            </span>
+          </td>
+
+          <td class="admin-actions" *ngIf="currentUser?.role === 'admin'">
+            <button class="btn-edit" (click)="editMatch(m)" title="Modifier">✏️ Éditer</button>
+            <button class="btn-delete" (click)="deleteMatch(m.id)" title="Supprimer">🗑️ Supprimer</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <ng-template #noMatch>
+      <div class="no-data">
+        <p>Aucun match disponible.</p>
+      </div>
+    </ng-template>
+
+    <!-- Pagination -->
+    <div *ngIf="totalPages > 1" class="pagination">
+      <button (click)="prevPage()" [disabled]="page === 1">← Précédent</button>
+      <span class="page-info">Page {{page}} / {{totalPages}}</span>
+      <button (click)="nextPage()" [disabled]="page === totalPages">Suivant →</button>
+    </div>
+  </div>
+</div>
